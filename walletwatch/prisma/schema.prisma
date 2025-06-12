@@ -100,3 +100,9 @@ model Budget {
   @@index([userId])
   @@map("budgets")
 }
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
