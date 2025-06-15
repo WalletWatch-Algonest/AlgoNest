@@ -1,11 +1,13 @@
-import React from 'react'
+import React from "react";
 
-const page = () => {
-  return (
-    <div>
-      Dashboard Page
-    </div>
-  )
+function DashboardPage(){
+  return( <div className="px-5">
+    {/*Budget Progress*/}
+    {/*Overview*/}
+    {/*Accounts Grid8*/}
+  </div>
+  );
 }
 
-export default page
+
+export default DashboardPage;
