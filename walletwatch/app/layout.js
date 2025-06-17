@@ -2,7 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/header";
 import { ClerkProvider } from "@clerk/nextjs";
-import {} from 'sonner'
+import { Toaster } from 'sonner'
 
 const inter = Inter({subsets : ["latin"]});
 
