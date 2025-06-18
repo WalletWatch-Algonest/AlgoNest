@@ -22,10 +22,10 @@ function DashboardPage(){
             </CardContent>
           </Card>
         </CreateAccountDrawer>
-        {accounts.length > 0 &&
+        {/* {accounts.length > 0 &&
           accounts?.map((account) => (
             <AccountCard key={account.id} account={account} />
-          ))}
+          ))} */}
       </div>
     </div>
   );
