@@ -48,10 +48,10 @@ export function CreateAccountDrawer({ children }) {
   });
 
   const {
-    loading: createAccountLoading,
-    fn: createAccountFn,
-    error,
     data: newAccount,
+    error,
+    fn: createAccountFn,
+    loading: createAccountLoading,
   } = useFetch(createAccount);
 
   const onSubmit = async (data) => {
@@ -59,12 +59,12 @@ export function CreateAccountDrawer({ children }) {
   };
 
   useEffect(() => {
-    if (newAccount) {
+    if (newAccount && !createAccountLoading) {
       toast.success("Account created successfully");
       reset();
       setOpen(false);
     }
-  }, [newAccount, reset]);
+  }, [newAccount, createAccountLoading]);
 
   useEffect(() => {
     if (error) {
@@ -187,3 +187,4 @@ export function CreateAccountDrawer({ children }) {
     </Drawer>
   );
 }
+export default CreateAccountDrawer;
