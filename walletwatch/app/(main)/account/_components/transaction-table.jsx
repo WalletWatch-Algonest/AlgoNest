@@ -50,7 +50,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { categoryColors } from "@/data/categories";
-import { bulkDeleteTransactions } from "@/actions/account";
+import { bulkDeleteTransactions } from "@/actions/accounts";
 import useFetch from "@/hooks/use-fetch";
 import { BarLoader } from "react-spinners";
 import { useRouter } from "next/navigation";
@@ -65,6 +65,7 @@ const RECURRING_INTERVALS = {
 };
 
 export function TransactionTable({ transactions }) {
+  const [localTransactions, setLocalTransactions] = useState(transactions);
   const [selectedIds, setSelectedIds] = useState([]);
   const [sortConfig, setSortConfig] = useState({
     field: "date",
@@ -78,7 +79,7 @@ export function TransactionTable({ transactions }) {
 
   // Memoized filtered and sorted transactions
   const filteredAndSortedTransactions = useMemo(() => {
-    let result = [...transactions];
+    let result = [...localTransactions];
 
     // Apply search filter
     if (searchTerm) {
@@ -123,7 +124,7 @@ export function TransactionTable({ transactions }) {
     });
 
     return result;
-  }, [transactions, searchTerm, typeFilter, recurringFilter, sortConfig]);
+  }, [localTransactions, searchTerm, typeFilter, recurringFilter, sortConfig]);
 
   // Pagination calculations
   const totalPages = Math.ceil(
@@ -180,9 +181,15 @@ export function TransactionTable({ transactions }) {
 
   useEffect(() => {
     if (deleted && !deleteLoading) {
-      toast.error("Transactions deleted successfully");
+      toast.success("Transactions deleted successfully"); 
+
+      setLocalTransactions((prev) =>
+        prev.filter((tx) => !selectedIds.includes(tx.id)) 
+      );
+
+      setSelectedIds([]); 
     }
-  }, [deleted, deleteLoading]);
+  }, [deleted, deleteLoading]); 
 
   const handleClearFilters = () => {
     setSearchTerm("");
@@ -201,7 +208,7 @@ export function TransactionTable({ transactions }) {
       {deleteLoading && (
         <BarLoader className="mt-4" width={"100%"} color="#9333ea" />
       )}
-      
+
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -454,31 +461,6 @@ export function TransactionTable({ transactions }) {
           </TableBody>
         </Table>
       </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-sm">
-            Page {currentPage} of {totalPages}
-          </span>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

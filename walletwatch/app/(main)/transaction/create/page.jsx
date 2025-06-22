@@ -1,5 +1,7 @@
 import { getUserAccounts } from "@/actions/dashboard";
 import { defaultCategories } from "@/data/categories";
+//import { getTransaction } from "@/actions/transactions";
+
 
 export default async function AddTransactionPage({ searchParams }) {
   const accounts = await getUserAccounts();
@@ -7,8 +9,8 @@ export default async function AddTransactionPage({ searchParams }) {
 
   let initialData = null;
   if (editId) {
-    const transaction = await getTransaction(editId);
-    initialData = transaction;
+   const transaction = await getTransaction(editId);
+   initialData = transaction;
   }
 
   return (

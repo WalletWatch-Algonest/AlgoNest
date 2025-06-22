@@ -105,9 +105,34 @@ export async function bulkDeleteTransactions(transactionIds) {
             return acc;
         },{});
 
-        
+        //Delete transactions and update account balances in a transactions 
+        await db.$transaction(async (tx)=>{
+          //Delete transactions
+          await tx.transaction.deleteMany({
+            where:{
+              id:{in : transactionIds },
+              userId: user.id,
+            },
+          });
+
+          for(const[acccountId, balanceChange] of Object.entries(
+            accountBalanceChanges
+          )){
+             await tx.account.update({
+              where:{ id: accountId},
+              data:{
+                balance:{
+                  increment:balanceChange,
+                },
+              },
+             });
+          }
+        });
+        revalidatePath("/dashboard");
+        revalidatePath("/account/[id]");
+         return {success:true};
   }
   catch(error){
-
+     return {success : false ,error:error.message}
   }
 }
