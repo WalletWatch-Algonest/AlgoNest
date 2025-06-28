@@ -1,8 +1,9 @@
+// jsconfig.json
 {
   "compilerOptions": {
-     "baseUrl": ".", 
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["*"]
     }
   }
 }
