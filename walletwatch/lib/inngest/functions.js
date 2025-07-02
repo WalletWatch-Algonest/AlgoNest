@@ -30,16 +30,28 @@ export const checkBudgetAlert = inngest.createFunction(
 
       await step.run(`check-budget-${budget.id}`, async () => {
         try {
-          const startDate = new Date();
-          startDate.setDate(1); // start of current month
+        
+          // Get current month's expenses
+          const currentDate = new Date();
+          const startOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth(),
+            1
+          );
+          const endOfMonth = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1,
+            0
+          );
 
           const expenses = await db.transaction.aggregate({
             where: {
               userId: budget.userId,
-              accountId: defaultAccount.id,
+              accountId: defaultAccount.id, // only consisder default account
               type: "EXPENSE",
               date: {
-                gte: startDate,
+                gte: startOfMonth,
+          lte: endOfMonth,
               },
             },
             _sum: {
