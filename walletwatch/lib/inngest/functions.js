@@ -1,6 +1,6 @@
 import { db } from "../prisma";
 import { inngest } from "./client";
-
+import { sendEmail } from "@/actions/send-email";
 export const checkBudgetAlert = inngest.createFunction(
   { id: "Check Budget Alerts" },
   { cron: "0 */6 * * *" },
@@ -68,7 +68,7 @@ export const checkBudgetAlert = inngest.createFunction(
           const lastAlertDate = budget.lastAlertSent ? new Date(budget.lastAlertSent) : null;
           const shouldAlert =
             percentageUsed >= 80 &&
-            (!lastAlertDate || isNewMonth(lastAlertDate, new Date()));
+            (!budget.lastAlertDate || isNewMonth(lastAlertDate, new Date()));
 
           if (shouldAlert) {
             console.log(
@@ -76,6 +76,20 @@ export const checkBudgetAlert = inngest.createFunction(
             );
 
             // TODO: Send email logic here
+            await sendEmail({
+            to: budget.user.email,
+            subject: `Budget Alert for ${defaultAccount.name}`,
+            react: EmailTemplate({
+              userName: budget.user.name,
+              type: "budget-alert",
+              data: {
+                percentageUsed,
+                budgetAmount: parseInt(budgetAmount).toFixed(1),
+                totalExpenses: parseInt(totalExpenses).toFixed(1),
+                accountName: defaultAccount.name,
+              },
+            }),
+          });
 
             // Update lastAlertSent
             await db.budget.update({
