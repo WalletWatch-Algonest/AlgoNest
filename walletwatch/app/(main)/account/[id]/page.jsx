@@ -7,9 +7,8 @@ import { TransactionTable } from "../_components/transaction-table";
 import { notFound } from "next/navigation";
 import { AccountChart } from "../_components/account-chart";
 
-// ✅ Destructure params directly in the function argument
-export default async function AccountPage({ params }) {
-  const { id } = params;
+export default async function AccountPage(props) {
+  const { id } = await props.params;
 
   const accountData = await getAccountWithTransactions(id);
 
