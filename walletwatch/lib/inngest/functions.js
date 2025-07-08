@@ -1,9 +1,16 @@
 import { db } from "../prisma";
 import { inngest } from "./client";
 import { sendEmail } from "@/actions/send-email";
+import EmailTemplate from "@/emails/template";
+
+// Optional: Check for missing API key
+if (!process.env.RESEND_API_KEY) {
+  throw new Error("Missing RESEND_API_KEY in .env");
+}
+
 export const checkBudgetAlert = inngest.createFunction(
   { id: "Check Budget Alerts" },
-  { cron: "0 */6 * * *" },
+  { cron: "0 */6 * * *" }, // Runs every 6 hours
   async ({ step }) => {
     const budgets = await step.run("fetch-budget", async () => {
       return await db.budget.findMany({
@@ -30,8 +37,6 @@ export const checkBudgetAlert = inngest.createFunction(
 
       await step.run(`check-budget-${budget.id}`, async () => {
         try {
-        
-          // Get current month's expenses
           const currentDate = new Date();
           const startOfMonth = new Date(
             currentDate.getFullYear(),
@@ -47,11 +52,11 @@ export const checkBudgetAlert = inngest.createFunction(
           const expenses = await db.transaction.aggregate({
             where: {
               userId: budget.userId,
-              accountId: defaultAccount.id, // only consisder default account
+              accountId: defaultAccount.id,
               type: "EXPENSE",
               date: {
                 gte: startOfMonth,
-          lte: endOfMonth,
+                lte: endOfMonth,
               },
             },
             _sum: {
@@ -65,39 +70,43 @@ export const checkBudgetAlert = inngest.createFunction(
 
           console.log(`Budget ${budget.id}: ${percentageUsed.toFixed(2)}% used`);
 
-          const lastAlertDate = budget.lastAlertSent ? new Date(budget.lastAlertSent) : null;
-          const shouldAlert =
-            percentageUsed >= 80 &&
-            (!budget.lastAlertDate || isNewMonth(lastAlertDate, new Date()));
+          const lastAlertDate = budget.lastAlertSent
+            ? new Date(budget.lastAlertSent)
+            : null;
+
+          const shouldAlert = percentageUsed >= 80 && (
+            !lastAlertDate ||
+            lastAlertDate.getMonth() !== currentDate.getMonth() ||
+            lastAlertDate.getFullYear() !== currentDate.getFullYear()
+          );
+
+          console.log(`Last alert sent: ${lastAlertDate}`);
+          console.log(`Should alert? ${shouldAlert}`);
 
           if (shouldAlert) {
-            console.log(
-              `⚠️ Budget ${budget.id} exceeds 80% usage. Sending alert. Last alert sent: ${budget.lastAlertSent}`
-            );
+            console.log(`⚠️ Budget ${budget.id} exceeds 80%. Sending alert.`);
 
-            // TODO: Send email logic here
             await sendEmail({
-            to: budget.user.email,
-            subject: `Budget Alert for ${defaultAccount.name}`,
-            react: EmailTemplate({
-              userName: budget.user.name,
-              type: "budget-alert",
-              data: {
-                percentageUsed,
-                budgetAmount: parseInt(budgetAmount).toFixed(1),
-                totalExpenses: parseInt(totalExpenses).toFixed(1),
-                accountName: defaultAccount.name,
-              },
-            }),
-          });
+              to: budget.user.email,
+              subject: `Budget Alert for ${defaultAccount.name}`,
+              react: EmailTemplate({
+                userName: budget.user.name,
+                type: "budget-alert",
+                data: {
+                  percentageUsed: percentageUsed.toFixed(1),
+                  budgetAmount: budgetAmount.toFixed(1),
+                  totalExpenses: totalExpenses.toFixed(1),
+                  accountName: defaultAccount.name,
+                },
+              }),
+            });
 
-            // Update lastAlertSent
             await db.budget.update({
               where: { id: budget.id },
               data: { lastAlertSent: new Date() },
             });
 
-            console.log(`✅ Budget ${budget.id}: lastAlertSent updated.`);
+            console.log(`✅ Alert sent & lastAlertSent updated for budget ${budget.id}`);
           } else {
             console.log(`Budget ${budget.id}: No alert needed.`);
           }
@@ -108,11 +117,3 @@ export const checkBudgetAlert = inngest.createFunction(
     }
   }
 );
-
-// Safe check for new month
-function isNewMonth(lastAlertDate, currentDate) {
-  return (
-    lastAlertDate.getMonth() !== currentDate.getMonth() ||
-    lastAlertDate.getFullYear() !== currentDate.getFullYear()
-  );
-}

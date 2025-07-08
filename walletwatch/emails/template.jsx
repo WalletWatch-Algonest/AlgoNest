@@ -13,7 +13,7 @@ import * as React from "react";
 
 export default function EmailTemplate({
   userName = "Piyush",
-  type = "budget-alter",
+  type = "budget-alert",
   data = {
     percentageUsed: 85,
     budgetAmount: 4000,
