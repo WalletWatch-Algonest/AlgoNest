@@ -10,7 +10,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@arcjet/analyze": "^1.0.0-beta.9",
+    "@arcjet/cache": "^1.0.0-beta.9",
+    "@arcjet/duration": "^1.0.0-beta.9",
+    "@arcjet/headers": "^1.0.0-beta.9",
+    "@arcjet/next": "^1.0.0-beta.9",
+    "@arcjet/runtime": "^1.0.0-beta.9",
+    "@arcjet/stable-hash": "^1.0.0-beta.9",
     "@clerk/nextjs": "^6.9.2",
+    "@fastify/busboy": "^3.1.1",
     "@hookform/resolvers": "^5.1.1",
     "@prisma/client": "^6.10.1",
     "@radix-ui/react-checkbox": "^1.3.2",
@@ -38,10 +46,13 @@
     "react-toastify": "^11.0.5",
     "recharts": "^3.0.2",
     "resend": "^4.6.0",
-    "sonner": "^2.0.5",
+    "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.0",
     "vaul": "^1.1.2",
     "zod": "^3.25.67"
+  },
+  "overrides": {
+    "@bufbuild/protobuf": "1.10.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
