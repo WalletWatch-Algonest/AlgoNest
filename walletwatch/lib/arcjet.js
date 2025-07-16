@@ -7,9 +7,9 @@ const aj = arcjet({
     // Rate limiting specifically for collection creation
     tokenBucket({
       mode: "LIVE",
-      refillRate: 2, // 10 collections
+      refillRate: 10, // 10 collections
       interval: 3600, // per hour
-      capacity: 2, // maximum burst capacity
+      capacity: 10, // maximum burst capacity
     }),
   ],
 });
