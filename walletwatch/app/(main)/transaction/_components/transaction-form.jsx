@@ -80,13 +80,16 @@ const AddTransactionForm = ({accounts,categories}) => {
     },[transactionResult,transactionLoading]);
 
     const filteredCategories=categories.filter((category)=>category.type==type);
-
-  
+    
+     const handleScanComplete = (scanData) =>{};
   
   return (
 
     
   <form className="space-y-6 " onSubmit={handleSubmit(onSubmit)}>
+  {/* AI Receipt Scanner  */}
+   <ReceiptScanner onScanComplete={handleScanComplete} />
+
     <div className="space-y-2">
       <label className="text-sm font-medium">Type</label>
         
