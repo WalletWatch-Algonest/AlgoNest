@@ -28,6 +28,7 @@ import { CalendarIcon} from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { useRouter} from "next/navigation";
 import {toast} from "sonner";
+import { ReceiptScanner } from "./recipt-scanner";
 // import {cn } from "@/lib/utils";
 // import { ReceiptScanner } from "./recipt-scanner";
 
@@ -81,11 +82,21 @@ const AddTransactionForm = ({accounts,categories}) => {
 
     const filteredCategories=categories.filter((category)=>category.type==type);
     
-     const handleScanComplete = (scanData) =>{};
+     const handleScanComplete = (scannedData) =>{
+      if(scannedData){
+        setValue("amount", scannedData.amount.toString());
+        setValue("date", new Date(scannedData.date));
+        if(scannedData.description){
+          setValue("description", scannedData.description);
+        }
+        if (scannedData.category) {
+        setValue("category", scannedData.category);
+      }
+      toast.success("Receipt scanned successfully");
+      }
+     };
   
   return (
-
-    
   <form className="space-y-6 " onSubmit={handleSubmit(onSubmit)}>
   {/* AI Receipt Scanner  */}
    <ReceiptScanner onScanComplete={handleScanComplete} />
