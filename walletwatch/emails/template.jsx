@@ -10,56 +10,56 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-
 export default function EmailTemplate({
-  userName = "Piyush",
+  userName = "",
   type = "budget-alert",
-  data = {
-    percentageUsed: 85,
-    budgetAmount: 4000,
-    totalExpenses: 3400,
-  },
+  data = {},
 }) {
-  if (type == "budget-alter"){   // guard for now
+  if (type === "budget-alert") {
+    // Extract values with fallback defaults
+    const percentageUsed =
+      typeof data.percentageUsed === "number" ? data.percentageUsed : 0;
+    const budgetAmount =
+      typeof data.budgetAmount === "number" ? data.budgetAmount : 0;
+    const totalExpenses =
+      typeof data.totalExpenses === "number" ? data.totalExpenses : 0;
+    const remaining = budgetAmount - totalExpenses;
 
-  return (
-    <Html>
-      <Head />                                {/*   <- closed immediately   */}
-      <Preview>Budget Alert</Preview>
+    return (
+      <Html>
+        <Head />
+        <Preview>Budget Alert</Preview>
+        <Body style={styles.body}>
+          <Container style={styles.container}>
+            <Heading style={styles.title}>Budget Alert</Heading>
 
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          <Heading style={styles.title}>Budget Alert</Heading>
+            <Text style={styles.text}>Hello {userName},</Text>
+            <Text style={styles.text}>
+              You’ve used {percentageUsed.toFixed(1)}% of your monthly budget.
+            </Text>
 
-          <Text style={styles.text}>Hello {userName},</Text>
-          <Text style={styles.text}>
-            You’ve used {data.percentageUsed.toFixed(1)}% of your monthly
-            budget.
-          </Text>
+            <Section style={styles.statsContainer}>
+              <Section style={styles.stat}>
+                <Text style={styles.text}>Budget Amount</Text>
+                <Text style={styles.text}>${budgetAmount.toFixed(2)}</Text>
+              </Section>
 
-          <Section style={styles.statsContainer}>
-            <div style={styles.stat}>
-              <Text style={styles.text}>Budget Amount</Text>
-              <Text style={styles.text}>${data.budgetAmount}</Text>
-            </div>
+              <Section style={styles.stat}>
+                <Text style={styles.text}>Spent So Far</Text>
+                <Text style={styles.text}>${totalExpenses.toFixed(2)}</Text>
+              </Section>
 
-            <div style={styles.stat}>
-              <Text style={styles.text}>Spent So Far</Text>
-              <Text style={styles.text}>${data.totalExpenses}</Text>
-            </div>
-
-            <div style={styles.stat}>
-              <Text style={styles.text}>Remaining</Text>
-              <Text style={styles.text}>
-                ${data.budgetAmount - data.totalExpenses}
-              </Text>
-            </div>
-          </Section>
-        </Container>
-      </Body>
-    </Html>
-  );
-}
+              <Section style={styles.stat}>
+                <Text style={styles.text}>Remaining</Text>
+                <Text style={styles.text}>${remaining.toFixed(2)}</Text>
+              </Section>
+            </Section>
+          </Container>
+        </Body>
+      </Html>
+    );
+  }
+  return null;
 }
 
 const styles = {
