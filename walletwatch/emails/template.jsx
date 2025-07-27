@@ -10,31 +10,11 @@ import {
   Text,
 } from "@react-email/components";
 
-// Dummy data
-const userName = "Shweta Singh";
-const type = "monthly-report";
-
-const data = {
-  month: "December",
-  stats: {
-    totalIncome: 5000,
-    totalExpenses: 3500,
-    byCategory: {
-      housing: 1500,
-      groceries: 600,
-      transportation: 400,
-      entertainment: 300,
-      utilities: 700,
-    },
-  },
-  insights: [
-    "Your housing expenses are 43% of your total spending - consider reviewing your housing costs.",
-    "Great job keeping entertainment expenses under control this month!",
-    "Setting up automatic savings could help you save 20% more of your income.",
-  ],
-};
-
-export default function EmailTemplate() {
+export default function EmailTemplate({
+  userName = "Shweta Singh",
+  type = "monthly-report",
+  data = {},
+}) {
   if (type === "monthly-report") {
     return (
       <Html>
@@ -46,23 +26,23 @@ export default function EmailTemplate() {
 
             <Text style={styles.text}>Hello {userName},</Text>
             <Text style={styles.text}>
-              Here&rsquo;s your financial summary for {data?.month}:
+              Here&rsquo;s your financial summary for {data?.month || "N/A"}:
             </Text>
 
             {/* Main Stats */}
             <Section style={styles.statsContainer}>
               <div style={styles.stat}>
                 <Text style={styles.text}>Total Income</Text>
-                <Text style={styles.heading}>${data?.stats.totalIncome}</Text>
+                <Text style={styles.heading}>${data?.stats?.totalIncome ?? 0}</Text>
               </div>
               <div style={styles.stat}>
                 <Text style={styles.text}>Total Expenses</Text>
-                <Text style={styles.heading}>${data?.stats.totalExpenses}</Text>
+                <Text style={styles.heading}>${data?.stats?.totalExpenses ?? 0}</Text>
               </div>
               <div style={styles.stat}>
                 <Text style={styles.text}>Net</Text>
                 <Text style={styles.heading}>
-                  ${data?.stats.totalIncome - data?.stats.totalExpenses}
+                  ${data?.stats?.totalIncome - data?.stats?.totalExpenses}
                 </Text>
               </div>
             </Section>
@@ -71,7 +51,7 @@ export default function EmailTemplate() {
             {data?.stats?.byCategory && (
               <Section style={styles.section}>
                 <Heading style={styles.heading}>Expenses by Category</Heading>
-                {Object.entries(data?.stats.byCategory).map(
+                {Object.entries(data.stats.byCategory).map(
                   ([category, amount]) => (
                     <div key={category} style={styles.row}>
                       <Text style={styles.text}>{category}</Text>
@@ -98,6 +78,50 @@ export default function EmailTemplate() {
               Thank you for using WalletWatch. Keep tracking your finances for better
               financial health!
             </Text>
+          </Container>
+        </Body>
+      </Html>
+    );
+  }
+
+  if (type === "budget-alert") {
+    const percentageUsed =
+      typeof data.percentageUsed === "number" ? data.percentageUsed : 0;
+    const budgetAmount =
+      typeof data.budgetAmount === "number" ? data.budgetAmount : 0;
+    const totalExpenses =
+      typeof data.totalExpenses === "number" ? data.totalExpenses : 0;
+    const remaining = budgetAmount - totalExpenses;
+
+    return (
+      <Html>
+        <Head />
+        <Preview>Budget Alert</Preview>
+        <Body style={styles.body}>
+          <Container style={styles.container}>
+            <Heading style={styles.title}>Budget Alert</Heading>
+
+            <Text style={styles.text}>Hello {userName},</Text>
+            <Text style={styles.text}>
+              You’ve used {percentageUsed.toFixed(1)}% of your monthly budget.
+            </Text>
+
+            <Section style={styles.statsContainer}>
+              <Section style={styles.stat}>
+                <Text style={styles.text}>Budget Amount</Text>
+                <Text style={styles.text}>${budgetAmount.toFixed(2)}</Text>
+              </Section>
+
+              <Section style={styles.stat}>
+                <Text style={styles.text}>Spent So Far</Text>
+                <Text style={styles.text}>${totalExpenses.toFixed(2)}</Text>
+              </Section>
+
+              <Section style={styles.stat}>
+                <Text style={styles.text}>Remaining</Text>
+                <Text style={styles.text}>${remaining.toFixed(2)}</Text>
+              </Section>
+            </Section>
           </Container>
         </Body>
       </Html>
