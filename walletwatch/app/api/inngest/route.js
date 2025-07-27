@@ -1,30 +1,16 @@
-
+import { inngest } from "@/lib/inngest/client";
+import {
+  checkBudgetAlert,
+  triggerRecurringTransactions,
+  processRecurringTransaction,
+} from "@/lib/inngest/functions";
 import { serve } from "inngest/next";
 
-import { inngest } from "@/lib/inngest/client";
-<<<<<<< HEAD
-import {
-  checkBudgetAlerts,
-  generateMonthlyReports,
-  processRecurringTransaction,
-  triggerRecurringTransactions,
-} from "@/lib/inngest/functions";
-=======
-import { checkBudgetAlert, processRecurringTransaction, triggerRecurringTransactions  } from "@/lib/inngest/functions"; // export a function from here
->>>>>>> 15ab7c473bcc3511444b87c6bbba370148e02ad3
-
-export const { GET, POST, PUT } = serve({
+export const { GET, POST } = serve({
   client: inngest,
   functions: [
-<<<<<<< HEAD
-    processRecurringTransaction,
+    checkBudgetAlert,
     triggerRecurringTransactions,
-    generateMonthlyReports,
-    checkBudgetAlerts,
+    processRecurringTransaction,
   ],
 });
-=======
-    checkBudgetAlert, triggerRecurringTransactions, processRecurringTransaction
-  ], //  this is NOT an empty array
-});
->>>>>>> 15ab7c473bcc3511444b87c6bbba370148e02ad3
