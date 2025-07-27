@@ -1,13 +1,13 @@
 import React from "react";
 import {
+  Html,
+  Head,
+  Preview,
   Body,
   Container,
-  Head,
   Heading,
-  Html,
-  Preview,
-  Section,
   Text,
+  Section,
 } from "@react-email/components";
 
 export default function EmailTemplate({
@@ -15,43 +15,78 @@ export default function EmailTemplate({
   type = "monthly-report",
   data = {},
 }) {
-  if (type === "monthly-report") {
-    return (
-      <Html>
-        <Head />
-        <Preview>Your Monthly Financial Report</Preview>
-        <Body style={styles.body}>
-          <Container style={styles.container}>
-            <Heading style={styles.title}>Monthly Financial Report</Heading>
+  // Set dummy data if none provided
+  const dummyMonthlyData = {
+    month: "July 2025",
+    stats: {
+      totalIncome: 10000,
+      totalExpenses: 7400,
+      byCategory: {
+        Rent: 3000,
+        Groceries: 1200,
+        Entertainment: 800,
+        Travel: 1000,
+        Miscellaneous: 1400,
+      },
+    },
+    insights: [
+      "You saved 26% of your income this month.",
+      "Entertainment expenses increased by 10% compared to last month.",
+      "You're close to your grocery budget limit.",
+    ],
+  };
 
-            <Text style={styles.text}>Hello {userName},</Text>
-            <Text style={styles.text}>
-              Here&rsquo;s your financial summary for {data?.month || "N/A"}:
-            </Text>
+  const dummyBudgetAlertData = {
+    budgetAmount: 8000,
+    totalExpenses: 7400,
+    percentageUsed: (7400 / 8000) * 100,
+  };
 
-            {/* Main Stats */}
-            <Section style={styles.statsContainer}>
-              <div style={styles.stat}>
-                <Text style={styles.text}>Total Income</Text>
-                <Text style={styles.heading}>${data?.stats?.totalIncome ?? 0}</Text>
-              </div>
-              <div style={styles.stat}>
-                <Text style={styles.text}>Total Expenses</Text>
-                <Text style={styles.heading}>${data?.stats?.totalExpenses ?? 0}</Text>
-              </div>
-              <div style={styles.stat}>
-                <Text style={styles.text}>Net</Text>
-                <Text style={styles.heading}>
-                  ${data?.stats?.totalIncome - data?.stats?.totalExpenses}
-                </Text>
-              </div>
-            </Section>
+  const isMonthly = type === "monthly-report";
+  const isBudgetAlert = type === "budget-alert";
+  const report = isMonthly ? { ...dummyMonthlyData, ...data } : {};
+  const alert = isBudgetAlert ? { ...dummyBudgetAlertData, ...data } : {};
 
-            {/* Category Breakdown */}
-            {data?.stats?.byCategory && (
+  return (
+    <Html>
+      <Head />
+      <Preview>
+        {isMonthly ? "Your Monthly Financial Report" : "Budget Alert"}
+      </Preview>
+      <Body style={styles.body}>
+        <Container style={styles.container}>
+          <Heading style={styles.title}>
+            {isMonthly ? "Monthly Financial Report" : "Budget Alert"}
+          </Heading>
+
+          <Text style={styles.text}>Hello {userName},</Text>
+
+          {isMonthly && (
+            <>
+              <Text style={styles.text}>
+                Here&rsquo;s your financial summary for {report.month}:
+              </Text>
+
+              <Section style={styles.statsContainer}>
+                <div style={styles.stat}>
+                  <Text style={styles.text}>Total Income</Text>
+                  <Text style={styles.heading}>${report.stats.totalIncome}</Text>
+                </div>
+                <div style={styles.stat}>
+                  <Text style={styles.text}>Total Expenses</Text>
+                  <Text style={styles.heading}>${report.stats.totalExpenses}</Text>
+                </div>
+                <div style={styles.stat}>
+                  <Text style={styles.text}>Net</Text>
+                  <Text style={styles.heading}>
+                    ${report.stats.totalIncome - report.stats.totalExpenses}
+                  </Text>
+                </div>
+              </Section>
+
               <Section style={styles.section}>
                 <Heading style={styles.heading}>Expenses by Category</Heading>
-                {Object.entries(data.stats.byCategory).map(
+                {Object.entries(report.stats.byCategory).map(
                   ([category, amount]) => (
                     <div key={category} style={styles.row}>
                       <Text style={styles.text}>{category}</Text>
@@ -60,75 +95,51 @@ export default function EmailTemplate({
                   )
                 )}
               </Section>
-            )}
 
-            {/* AI Insights */}
-            {data?.insights && (
               <Section style={styles.section}>
                 <Heading style={styles.heading}>WalletWatch Insights</Heading>
-                {data.insights.map((insight, index) => (
+                {report.insights.map((insight, index) => (
                   <Text key={index} style={styles.text}>
                     • {insight}
                   </Text>
                 ))}
               </Section>
-            )}
+            </>
+          )}
 
-            <Text style={styles.footer}>
-              Thank you for using WalletWatch. Keep tracking your finances for better
-              financial health!
-            </Text>
-          </Container>
-        </Body>
-      </Html>
-    );
-  }
+          {isBudgetAlert && (
+            <>
+              <Text style={styles.text}>
+                You’ve used {alert.percentageUsed.toFixed(1)}% of your monthly budget.
+              </Text>
 
-  if (type === "budget-alert") {
-    const percentageUsed =
-      typeof data.percentageUsed === "number" ? data.percentageUsed : 0;
-    const budgetAmount =
-      typeof data.budgetAmount === "number" ? data.budgetAmount : 0;
-    const totalExpenses =
-      typeof data.totalExpenses === "number" ? data.totalExpenses : 0;
-    const remaining = budgetAmount - totalExpenses;
-
-    return (
-      <Html>
-        <Head />
-        <Preview>Budget Alert</Preview>
-        <Body style={styles.body}>
-          <Container style={styles.container}>
-            <Heading style={styles.title}>Budget Alert</Heading>
-
-            <Text style={styles.text}>Hello {userName},</Text>
-            <Text style={styles.text}>
-              You’ve used {percentageUsed.toFixed(1)}% of your monthly budget.
-            </Text>
-
-            <Section style={styles.statsContainer}>
-              <Section style={styles.stat}>
-                <Text style={styles.text}>Budget Amount</Text>
-                <Text style={styles.text}>${budgetAmount.toFixed(2)}</Text>
+              <Section style={styles.statsContainer}>
+                <div style={styles.stat}>
+                  <Text style={styles.text}>Budget Amount</Text>
+                  <Text style={styles.heading}>${alert.budgetAmount.toFixed(2)}</Text>
+                </div>
+                <div style={styles.stat}>
+                  <Text style={styles.text}>Spent So Far</Text>
+                  <Text style={styles.heading}>${alert.totalExpenses.toFixed(2)}</Text>
+                </div>
+                <div style={styles.stat}>
+                  <Text style={styles.text}>Remaining</Text>
+                  <Text style={styles.heading}>
+                    ${(alert.budgetAmount - alert.totalExpenses).toFixed(2)}
+                  </Text>
+                </div>
               </Section>
+            </>
+          )}
 
-              <Section style={styles.stat}>
-                <Text style={styles.text}>Spent So Far</Text>
-                <Text style={styles.text}>${totalExpenses.toFixed(2)}</Text>
-              </Section>
-
-              <Section style={styles.stat}>
-                <Text style={styles.text}>Remaining</Text>
-                <Text style={styles.text}>${remaining.toFixed(2)}</Text>
-              </Section>
-            </Section>
-          </Container>
-        </Body>
-      </Html>
-    );
-  }
-
-  return null;
+          <Text style={styles.footer}>
+            Thank you for using WalletWatch. Keep tracking your finances for better
+            financial health!
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  );
 }
 
 const styles = {
@@ -148,18 +159,18 @@ const styles = {
     fontSize: "32px",
     fontWeight: "bold",
     textAlign: "center",
-    margin: "0 0 20px",
+    marginBottom: "20px",
   },
   heading: {
     color: "#1f2937",
     fontSize: "20px",
     fontWeight: "600",
-    margin: "0 0 16px",
+    marginBottom: "16px",
   },
   text: {
     color: "#4b5563",
     fontSize: "16px",
-    margin: "0 0 16px",
+    marginBottom: "16px",
   },
   section: {
     marginTop: "32px",
