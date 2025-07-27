@@ -64,49 +64,66 @@ export const checkBudgetAlert = inngest.createFunction(
             },
           });
 
-          const totalExpenses = expenses._sum.amount?.toNumber?.() || 0;
-          const budgetAmount = budget.amount;
-          const percentageUsed = (totalExpenses / budgetAmount) * 100;
+          const totalExpenses = Number(expenses._sum.amount) || 0;
+          const budgetAmount = Number(budget.amount) || 0;
 
-          console.log(`Budget ${budget.id}: ${percentageUsed.toFixed(2)}% used`);
+          const percentageUsed =
+            budgetAmount > 0 ? (totalExpenses / budgetAmount) * 100 : 0;
+
+          console.log(
+            `Budget ${budget.id}: ${percentageUsed.toFixed(2)}% used`
+          );
 
           const lastAlertDate = budget.lastAlertSent
             ? new Date(budget.lastAlertSent)
             : null;
 
-          const shouldAlert = percentageUsed >= 80 && (
-            !lastAlertDate ||
-            lastAlertDate.getMonth() !== currentDate.getMonth() ||
-            lastAlertDate.getFullYear() !== currentDate.getFullYear()
-          );
+          const hoursSinceLastAlert = lastAlertDate
+            ? (currentDate - lastAlertDate) / (1000 * 60 * 60)
+            : null;
+
+          const shouldAlert =
+            percentageUsed >= 80 &&
+            (!lastAlertDate || hoursSinceLastAlert >= 24);
 
           console.log(`Last alert sent: ${lastAlertDate}`);
           console.log(`Should alert? ${shouldAlert}`);
 
-          if (shouldAlert) {
-            console.log(`⚠️ Budget ${budget.id} exceeds 80%. Sending alert.`);
+            if (shouldAlert) {
+            console.log(`⚠️ Sending alert to user ${budget.user.email} for budget ${budget.id}`);
 
             await sendEmail({
-              to: budget.user.email,
+              //to: budget.user.email,
+              to: process.env.NODE_ENV === "development"
+    ? "algonest185@gmail.com" : budget.user.email,
               subject: `Budget Alert for ${defaultAccount.name}`,
               react: EmailTemplate({
                 userName: budget.user.name,
                 type: "budget-alert",
                 data: {
-                  percentageUsed: percentageUsed.toFixed(1),
-                  budgetAmount: budgetAmount.toFixed(1),
-                  totalExpenses: totalExpenses.toFixed(1),
+                  percentageUsed,
+                  budgetAmount,
+                  totalExpenses,
                   accountName: defaultAccount.name,
                 },
               }),
             });
 
-            await db.budget.update({
-              where: { id: budget.id },
-              data: { lastAlertSent: new Date() },
-            });
+            try {
+              console.log("Updating lastAlertSent for budget", budget.id);
 
-            console.log(`✅ Alert sent & lastAlertSent updated for budget ${budget.id}`);
+              await db.budget.update({
+                where: { id: budget.id },
+                data: { lastAlertSent: new Date() },
+              });
+
+              console.log("✅ lastAlertSent updated for budget", budget.id);
+            } catch (updateError) {
+              console.error(
+                `❌ Failed to update lastAlertSent for budget ${budget.id}:`,
+                updateError
+              );
+            }
           } else {
             console.log(`Budget ${budget.id}: No alert needed.`);
           }
